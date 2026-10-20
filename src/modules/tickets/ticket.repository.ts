@@ -20,6 +20,30 @@ const ticketInclude = {
   }
 } satisfies Prisma.TicketInclude;
 
+const statusInclude = {
+  ticket: {
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      status: true,
+      priority: true
+    }
+  },
+  user: {
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true
+    }
+  }
+} satisfies Prisma.StatusHistoryInclude;
+
+export type StatusHistoryWithRelations = Prisma.StatusHistoryGetPayload<{
+  include: typeof statusInclude;
+}>;
+
 export type TicketWithRelations = Prisma.TicketGetPayload<{
   include: typeof ticketInclude;
 }>;
@@ -99,6 +123,13 @@ export class TicketRepository {
         name: true,
         email: true
       }
+    });
+  }
+
+  async getStatusHistory(id: string) {
+    return prisma.statusHistory.findMany({
+      where: { id },
+      include: statusInclude
     });
   }
 }
