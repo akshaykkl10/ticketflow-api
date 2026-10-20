@@ -126,9 +126,11 @@ export class TicketRepository {
     });
   }
 
-  async getStatusHistory(id: string) {
+  async getStatusHistory(ticketId: string) {
     return prisma.statusHistory.findMany({
-      where: { id },
+      where: {
+        ticketId
+      },
       include: statusInclude
     });
   }
