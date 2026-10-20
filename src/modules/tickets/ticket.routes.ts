@@ -10,6 +10,11 @@ import {
   ticketIdParamSchema,
   updateTicketSchema
 } from './ticket.schemas.js';
+import {
+  createCommentSchema,
+  listCommentQuerytSchema
+} from '../comments/comment.schema.js';
+import { commentController } from '../comments/comment.controller.js';
 
 export const ticketRoutes = Router();
 
@@ -93,6 +98,29 @@ ticketRoutes.get(
   }
 );
 
+ticketRoutes.get(
+  '/:id/comments',
+  validate({ params: ticketIdParamSchema, query: listCommentQuerytSchema }),
+  (req, res, next) => {
+    commentController.getCommentsById(req, res).catch(next);
+  }
+);
+
+ticketRoutes.get(
+  '/:id/status-history',
+  validate({ params: ticketIdParamSchema }),
+  (req, res, next) => {
+    ticketController.getStatusHistory(req, res).catch(next);
+  }
+);
+
+ticketRoutes.post(
+  '/:id/comments',
+  validate({ params: ticketIdParamSchema, body: createCommentSchema }),
+  (req, res, next) => {
+    commentController.create(req, res).catch(next);
+  }
+);
 ticketRoutes.patch(
   '/:id',
   validate({ params: ticketIdParamSchema, body: updateTicketSchema }),
