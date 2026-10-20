@@ -28,32 +28,59 @@ enum TicketPriority {
 }
 
 model User {
-  id              String   @id @default(cuid())
-  email           String   @unique
+  id              String          @id @default(cuid())
+  email           String          @unique
   passwordHash    String
   name            String
-  role            Role     @default(USER)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  createdTickets  Ticket[] @relation("CreatedTickets")
-  assignedTickets Ticket[] @relation("AssignedTickets")
+  role            Role            @default(USER)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  createdTickets  Ticket[]        @relation("CreatedTickets")
+  assignedTickets Ticket[]        @relation("AssignedTickets")
+  postedComments  Comment[]       @relation("PostedComments")
+  changedStatus   StatusHistory[] @relation("ChangedStatus")
 }
 
 model Ticket {
-  id           String         @id @default(cuid())
-  title        String
-  description  String
-  status       TicketStatus   @default(OPEN)
-  priority     TicketPriority @default(MEDIUM)
-  createdById  String
-  assignedToId String?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  createdBy    User           @relation("CreatedTickets", fields: [createdById], references: [id], onDelete: Restrict)
-  assignedTo   User?          @relation("AssignedTickets", fields: [assignedToId], references: [id], onDelete: SetNull)
+  id            String          @id @default(cuid())
+  title         String
+  description   String
+  status        TicketStatus    @default(OPEN)
+  priority      TicketPriority  @default(MEDIUM)
+  createdById   String
+  assignedToId  String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  createdBy     User            @relation("CreatedTickets", fields: [createdById], references: [id], onDelete: Restrict)
+  assignedTo    User?           @relation("AssignedTickets", fields: [assignedToId], references: [id], onDelete: SetNull)
+  comments      Comment[]       @relation("Comments")
+  statusHistory StatusHistory[] @relation("StatusHistory")
 
   @@index([createdById])
   @@index([assignedToId])
   @@index([status])
   @@index([priority])
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  content   String
+  ticketId  String
+  authorId  String
+  createdAt DateTime  @default(now())
+
+  ticket    Ticket    @relation("Comments", fields: [ticketId], references: [id], onDelete: Cascade)
+  user      User      @relation("PostedComments", fields: [authorId], references: [id])
+}
+
+model StatusHistory {
+  id          String        @id @default(cuid())
+  ticketId    String
+  userId      String
+  changedAt   DateTime      @default(now())
+  statusFrom  TicketStatus 
+  statusTo    TicketStatus 
+
+  ticket      Ticket        @relation("StatusHistory", fields: [ticketId], references: [id], onDelete: Cascade)
+  user        User          @relation("ChangedStatus", fields: [userId], references: [id])
 }
