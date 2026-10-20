@@ -134,4 +134,30 @@ export class TicketRepository {
       include: statusInclude
     });
   }
+  async changeStatus(
+    ticketId: string,
+    userId: string,
+    status: TicketStatus,
+    nextStatus: TicketStatus
+  ) {
+    return prisma.$transaction(async (transaction) => {
+      const ticket = await transaction.ticket.update({
+        where: {
+          id: ticketId
+        },
+        data: {
+          status: nextStatus
+        }
+      });
+      await transaction.statusHistory.create({
+        data: {
+          ticketId,
+          userId,
+          statusFrom: status,
+          statusTo: nextStatus
+        }
+      });
+      return ticket;
+    });
+  }
 }
