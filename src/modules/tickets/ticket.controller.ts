@@ -74,6 +74,14 @@ export class TicketController {
     );
     response.json({ data: ticket });
   }
+
+  async getStatusHistory(request: Request, response: Response) {
+    const history = await ticketService.getStatusHistory(
+      authUser(request),
+      String(request.params.id)
+    );
+    response.json({ data: history });
+  }
 }
 
 export const ticketController = new TicketController();
